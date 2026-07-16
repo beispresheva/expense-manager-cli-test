@@ -7,5 +7,12 @@
 
 import Foundation
 
-print("Test2 Beis Presheva")
+let transaction = Transaction(title: "Netflix", amount: 12.99, type: .expense, category: .subscriptions)
 
+print("My Transaction: \n")
+print(transaction.title)
+print(transaction.amount)
+print(transaction.type.rawValue)
+print(transaction.category.rawValue)
+print(transaction.note ?? "No note provided.")
+print(transaction.merchant ?? "No merchant provided.")
