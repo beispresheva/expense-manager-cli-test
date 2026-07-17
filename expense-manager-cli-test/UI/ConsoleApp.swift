@@ -8,6 +8,7 @@
 import Foundation
 
 final class ConsoleApp {
+    private let repository = TransactionRepository()
     private var isRunning = true
     
     func run() {
@@ -24,22 +25,22 @@ final class ConsoleApp {
         switch choice {
             
         case 1:
-            print("Add income selected")
+            addTransaction(type: .income)
             
         case 2:
-            print("Add expense selected")
+            addTransaction(type: .expense)
             
         case 3:
-            print("View all transactions selected")
+            showAllTransactions()
             
         case 4:
-            print("Search transactions selected")
+            searchTransactions()
             
         case 5:
-            print("View financial summary selected")
+            showFinancialSummary()
             
         case 6:
-            print("Remove a transaction selected")
+            removeTransaction()
             
         case 7:
             print("Goodbye!")
@@ -49,6 +50,177 @@ final class ConsoleApp {
             break
         }
     }
-
     
+    private func printTransaction(_ transaction: Transaction) {
+        print("ID: \(transaction.id)")
+        print("Title: \(transaction.title)")
+        print("Amount: \(transaction.amount)")
+        print("Type: \(transaction.type.rawValue)")
+        print("Category: \(transaction.category.rawValue)")
+        print("Note: \(transaction.note ?? "No note")")
+        print("Merchant: \(transaction.merchant ?? "No merchant")")
+        print("----------------")
+    }
+    
+    private func addTransaction(type: TransactionType) {
+        let title = ConsoleInput.readRequiredText(prompt: "Enter transaction title:")
+        
+        let amount = ConsoleInput.readPositiveDouble(prompt: "Enter transaction amount:")
+        
+        let category = chooseCategory()
+        
+        let note = ConsoleInput.readOptionalText(prompt: "Enter (optional) note:")
+        
+        let merchant = ConsoleInput.readOptionalText(prompt: "Enter merchant (optional):")
+        
+        let transaction = Transaction(
+            title: title,
+            amount: amount,
+            type: type,
+            category: category,
+            note: note,
+            merchant: merchant
+        )
+
+        repository.add(transaction)
+
+        print("\nTransaction added successfully.")
+    }
+
+    private func chooseCategory() -> TransactionCategory {
+        print("\nChoose a category:")
+
+            for (index, category) in TransactionCategory.allCases.enumerated() {
+                print("\(index + 1). \(category.rawValue)")
+            }
+
+            let choice = ConsoleInput.readMenuChoice(
+                prompt: "Category:",
+                validRange: 1...TransactionCategory.allCases.count
+            )
+
+            return TransactionCategory.allCases[choice - 1]
+    }
+    
+    private func showAllTransactions() {
+        let transactions = repository.getAll()
+        
+        if transactions.isEmpty {
+            print("No transactions available.")
+            return
+        }
+        
+        print("\nAll Transactions")
+        print("----------------")
+
+        for transaction in transactions {
+            printTransaction(transaction)
+        }
+    }
+    
+    private func searchTransactions() {
+        let searchText = ConsoleInput.readRequiredText(
+            prompt: "Enter title, note or merchant to search:"
+        )
+
+        let results = repository.getAll().filter { transaction in
+            transaction.title.localizedCaseInsensitiveContains(searchText)
+            || transaction.note?.localizedCaseInsensitiveContains(searchText) == true
+            || transaction.merchant?.localizedCaseInsensitiveContains(searchText) == true
+        }
+
+        if results.isEmpty {
+            print("\nNo matching transactions found.")
+            return
+        }
+
+        print("\nSearch Results")
+        print("----------------")
+
+        for transaction in results {
+            printTransaction(transaction)
+        }
+    }
+    
+    private func removeTransaction() {
+        let idText = ConsoleInput.readRequiredText(prompt: "Enter the transaction ID:")
+
+        guard let id = UUID(uuidString: idText) else {
+            print("\nInvalid transaction ID.")
+            return
+        }
+
+        guard let transaction = repository.findById(by: id) else {
+            print("\nTransaction not found.")
+            return
+        }
+
+        print("\nTransaction found:")
+        printTransaction(transaction)
+        
+        repository.delete(by: id)
+
+        print("Transaction removed successfully.")
+    }
+    
+    private func showFinancialSummary() {
+        let transactions = repository.getAll()
+
+        let totalIncome = transactions
+            .filter { $0.type == .income }
+            .reduce(0) { total, transaction in
+                total + transaction.amount
+            }
+
+        let totalExpenses = transactions
+            .filter { $0.type == .expense }
+            .reduce(0) { total, transaction in
+                total + transaction.amount
+            }
+
+        let balance = totalIncome - totalExpenses
+        
+        let expenses = transactions.filter { $0.type == .expense }
+
+        let highestExpense = expenses.max { first, second in
+            first.amount < second.amount
+        }
+
+        let averageExpense: Double
+
+        if expenses.isEmpty {
+            averageExpense = 0
+        } else {
+            averageExpense = totalExpenses / Double(expenses.count)
+        }
+        
+        var spendingByCategory: [TransactionCategory: Double] = [:]
+
+        for expense in expenses {
+            spendingByCategory[expense.category, default: 0] += expense.amount
+        }
+        
+        let usedCategories = Set(expenses.map { $0.category })
+
+        print("\nFinancial Summary")
+        print("-----------------")
+        print("Total income: \(totalIncome)")
+        print("Total expenses: \(totalExpenses)")
+        print("Balance: \(balance)")
+        print("Transaction count: \(transactions.count)")
+        print("Highest expense: \(highestExpense?.amount ?? 0)")
+        print("Average expense: \(averageExpense)")
+        
+        print("\nSpending by Category")
+
+        if spendingByCategory.isEmpty {
+            print("No expense categories found.")
+        } else {
+            for (category, total) in spendingByCategory {
+                print("\(category.rawValue): \(total)")
+            }
+        }
+        
+        print("\nUnique expense categories used: \(usedCategories.count)")
+    }
 }
