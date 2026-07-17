@@ -23,10 +23,6 @@ repository.delete(by: transaction1.id)
 
 let remainingTransactions = repository.getAll()
 
-if remainingTransactions.isEmpty {
-    print("There are not transactions in the repository")
-} else {
-    print(remainingTransactions.count)
-}
+print("test commit")
 
 
