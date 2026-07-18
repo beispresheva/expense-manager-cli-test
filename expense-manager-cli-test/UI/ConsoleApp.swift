@@ -54,7 +54,7 @@ final class ConsoleApp {
     private func printTransaction(_ transaction: Transaction) {
         print("ID: \(transaction.id)")
         print("Title: \(transaction.title)")
-        print("Amount: \(transaction.amount)")
+        print("Amount: \(transaction.amount.currencyText)")
         print("Type: \(transaction.type.rawValue)")
         print("Category: \(transaction.category.rawValue)")
         print("Note: \(transaction.note ?? "No note")")
@@ -204,12 +204,11 @@ final class ConsoleApp {
 
         print("\nFinancial Summary")
         print("-----------------")
-        print("Total income: \(totalIncome)")
-        print("Total expenses: \(totalExpenses)")
-        print("Balance: \(balance)")
-        print("Transaction count: \(transactions.count)")
-        print("Highest expense: \(highestExpense?.amount ?? 0)")
-        print("Average expense: \(averageExpense)")
+        print("Total income: \(totalIncome.currencyText)")
+        print("Total expenses: \(totalExpenses.currencyText)")
+        print("Balance: \(balance.currencyText)")
+        print("Highest expense: \(highestExpense?.amount.currencyText ?? "€0.00")")
+        print("Average expense: \(averageExpense.currencyText)")
         
         print("\nSpending by Category")
 
@@ -217,7 +216,7 @@ final class ConsoleApp {
             print("No expense categories found.")
         } else {
             for (category, total) in spendingByCategory {
-                print("\(category.rawValue): \(total)")
+                print("\(category.rawValue): \(total.currencyText)")
             }
         }
         
