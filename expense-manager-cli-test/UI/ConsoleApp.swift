@@ -8,9 +8,13 @@
 import Foundation
 
 final class ConsoleApp {
-    private let repository = TransactionRepository()
+    private let repository: TransactionRepositoryProtocol
     private var budget: Budget?
     private var isRunning = true
+    
+    init(repository: TransactionRepositoryProtocol) {
+        self.repository = repository
+    }
     
     func run() {
         while isRunning {

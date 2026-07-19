@@ -7,5 +7,6 @@
 
 import Foundation
 
-let app = ConsoleApp()
+let repository = TransactionRepository()
+let app = ConsoleApp(repository: repository)
 app.run()

@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class TransactionRepository {
+final class TransactionRepository: TransactionRepositoryProtocol {
     private var transactions: [Transaction] = []
     var count: Int {
         return transactions.count
