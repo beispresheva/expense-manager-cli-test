@@ -9,13 +9,14 @@ import Foundation
 
 final class ConsoleApp {
     private let repository = TransactionRepository()
+    private var budget: Budget?
     private var isRunning = true
     
     func run() {
         while isRunning {
             ConsoleMenu.showMainMenu()
             
-            let choice = ConsoleInput.readMenuChoice(prompt: "Enter your choice: ", validRange: 1...7)
+            let choice = ConsoleInput.readMenuChoice(prompt: "Enter your choice: ", validRange: 1...9)
             
             handleMenuChoice(choice)
         }
@@ -43,6 +44,16 @@ final class ConsoleApp {
             removeTransaction()
             
         case 7:
+            manageBudget()
+            
+        case 8:
+            if let budget {
+                showBudgetStatus(for: budget)
+            } else {
+                print("No monthly budget has been set.")
+            }
+            
+        case 9:
             print("Goodbye!")
             isRunning = false
             
@@ -221,5 +232,29 @@ final class ConsoleApp {
         }
         
         print("\nUnique expense categories used: \(usedCategories.count)")
+    }
+    
+    private func showBudgetStatus(for budget: Budget) {
+        let totalExpenses = repository.getAll()
+            .filter { $0.type == .expense }
+            .reduce(0) { $0 + $1.amount }
+
+        print("Budget limit: \(budget.limit.currencyText)")
+        print("Total expenses: \(totalExpenses.currencyText)")
+        
+        print(budget.summary(for: totalExpenses))
+    }
+    
+    private func manageBudget() {
+        
+        let limit = ConsoleInput.readPositiveDouble(prompt: "Enter budget limit:")
+        
+        budget = Budget(limit: limit)
+        
+        print("Monthly budget set successfully.")
+        
+        if let budget {
+            showBudgetStatus(for: budget)
+        }
     }
 }

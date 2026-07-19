@@ -11,4 +11,8 @@ extension Double {
     var currencyText: String {
         String(format: "€%.2f", self)
     }
+    
+    var percentageText: String {
+        String(format: "%.1f%%", self)
+    }
 }

@@ -19,7 +19,9 @@ enum ConsoleMenu {
         4. Search transactions
         5. View financial summary
         6. Remove a transaction
-        7. Exit
+        7. Manage monthly budget
+        8. View current budget
+        9. Exit
         
         """)
     }
