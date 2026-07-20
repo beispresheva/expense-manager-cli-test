@@ -15,7 +15,7 @@ struct Budget {
         
         if totalExpenses > limit {
             return .exceeded
-        } else if usagePercentage >= 0.8 {
+        } else if usagePercentage >= 80 {
             return .warning
         } else {
             return .safe
@@ -52,8 +52,6 @@ struct Budget {
             """
 
         case .exceeded:
-            let exceeded = exceededAmount(for: totalExpenses)
-
             return """
             Budget used: \(report.percentageUsed.percentageText)
             Budget exceeded by: \(report.exceededAmount.currencyText)

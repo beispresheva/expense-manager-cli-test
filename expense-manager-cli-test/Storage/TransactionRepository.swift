@@ -24,7 +24,7 @@ final class TransactionRepository: TransactionRepositoryProtocol {
     }
     
     func findById(by id: UUID) -> Transaction? {
-        return transactions.first { transaction in
+        return transactions.firstMatch { transaction in
             transaction.id == id
         }
     }
